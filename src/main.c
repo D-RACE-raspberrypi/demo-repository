@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
         SDL_Quit();
         return -1;
     }
-    printf("Manette detecter : %s\nConnexion à l'ESP32...\n", SDL_GameControllerName(controller));
+    printf("Manette detecter : %s\n", SDL_GameControllerName(controller));
     
     SDL_GameControllerRumble(controller, 0.5, 1, 500); // Fait vibrer la manette
     SDL_GameControllerSetLED(controller, 0x00, 0xFF, 0x00); // Allume la LED de la manette en vert

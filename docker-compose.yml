@@ -1,5 +1,5 @@
 services:
-  astrid:
+  d_race:
     build: .
     image: d_race
     networks:
