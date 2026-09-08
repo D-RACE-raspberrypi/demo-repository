@@ -1,0 +1,16 @@
+services:
+  astrid:
+    build: .
+    image: d_race
+    networks:
+      - d_race_rasp
+    stdin_open: true
+    tty: true
+    volumes:
+      - /dev/input:/dev/input:ro   # périphériques manette
+      - /run/udev:/run/udev:ro     # détection des devices par SDL2
+    device_cgroup_rules:
+      - 'c 13:* rmw'               # autorise les devices input (major 13)
+
+networks:
+  d_race_rasp:
