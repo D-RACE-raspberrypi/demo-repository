@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /src
-COPY BT_controller/controller.c .
-RUN gcc -O2 -Wall -o controller controller.c -lSDL2
+COPY src/ .
+RUN gcc -O2 -Wall -I. -o main main.c BT_controller/controller.c -lSDL2
 
 # --- Étape 2 : image d'exécution ---
 FROM debian:bookworm-slim
@@ -17,6 +17,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --from=build /src/controller .
+COPY --from=build /src/main .
 
-CMD ["./controller"]
+CMD ["./main"]
