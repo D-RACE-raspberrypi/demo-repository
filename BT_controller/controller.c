@@ -132,28 +132,28 @@ int joystick(SDL_Event event) {
     
     switch (event.caxis.axis){
     case SDL_CONTROLLER_AXIS_LEFTX: // Joystick gauche X
-        value_LX = (float)(event.caxis.value);
+        value_LX = (float)(event.caxis.value/32767.0);
         printf("JGX: %f\n", value_LX);
         break;
     case SDL_CONTROLLER_AXIS_LEFTY: // Joystick gauche Y
-        value_LY = (float)(event.caxis.value);
+        value_LY = (float)(event.caxis.value/32767.0);
         printf("JGY: %f\n", value_LY);
         break;
     case SDL_CONTROLLER_AXIS_RIGHTX: // Joystick droit X
-        value_RX = (float)(event.caxis.value);
+        value_RX = (float)(event.caxis.value/32767.0);
         printf("JDX: %f\n", value_RX);
         break;
     case SDL_CONTROLLER_AXIS_RIGHTY: // Joystick droit Y
-        value_RY = (float)(event.caxis.value);
+        value_RY = (float)(event.caxis.value/32767.0);
         printf("JDY: %f\n", value_RY);
         break;
     case SDL_CONTROLLER_AXIS_TRIGGERLEFT: // Gâchette gauche
-        value_L2 = (float)(event.caxis.value);
+        value_L2 = (float)(event.caxis.value/32767.0);
         printf("GG: %f\n", value_L2);
         press_L2_value = value_L2;
         break;
     case SDL_CONTROLLER_AXIS_TRIGGERRIGHT: // Gachette droite
-        value_R2 = (float)(event.caxis.value);
+        value_R2 = (float)(event.caxis.value/32767.0);
         printf("GD: %f\n", value_R2);
         press_R2_value = value_R2;
         break;

@@ -45,7 +45,6 @@ Une bibliothèque se rajoute donc à 2 endroits :
            gcc libc6-dev libsdl2-dev libcurl4-openssl-dev \
        && rm -rf /var/lib/apt/lists/*
    ```
-
 2. **Étape finale** : la bibliothèque runtime (sans `-dev`), pour le `.so` :
 
    ```dockerfile
@@ -53,13 +52,11 @@ Une bibliothèque se rajoute donc à 2 endroits :
            libsdl2-2.0-0 libcurl4 \
        && rm -rf /var/lib/apt/lists/*
    ```
-
 3. Ajouter le flag de link à la ligne `gcc` si besoin (ex. `-lcurl`) :
 
    ```dockerfile
    RUN gcc -O2 -Wall -o controller controller.c -lSDL2 -lcurl
    ```
-
 4. Reconstruire : `docker compose build`
 
 Astuce pour trouver le nom des paquets Debian : `apt search <nom>` ou
@@ -112,9 +109,9 @@ docker compose logs -f   # logs en continu
 
 ## 8. Problèmes courants
 
-| Symptôme | Cause probable | Solution |
-|---|---|---|
-| `Aucune manette détectée.` | Manette non connectée à l'hôte | Appairer/brancher la manette sur le Pi, vérifier `ls /dev/input/` sur l'hôte |
-| La manette est sur l'hôte mais pas dans le conteneur | Volumes/devices manquants | Vérifier les sections `volumes:` et `device_cgroup_rules:` du `docker-compose.yml` |
-| Modif du code sans effet | Image pas reconstruite | Relancer avec `docker compose up --build` |
-| Erreur de compilation au build | Voir le message `gcc` dans la sortie du build | Corriger `controller.c`, rebuilder |
+| Symptôme                                             | Cause probable                                 | Solution                                                                                 |
+| ----------------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `Aucune manette détectée.`                        | Manette non connectée à l'hôte              | Appairer/brancher la manette sur le Pi, vérifier`ls /dev/input/` sur l'hôte          |
+| La manette est sur l'hôte mais pas dans le conteneur | Volumes/devices manquants                      | Vérifier les sections`volumes:` et `device_cgroup_rules:` du `docker-compose.yml` |
+| Modif du code sans effet                              | Image pas reconstruite                         | Relancer avec`docker compose up --build`                                               |
+| Erreur de compilation au build                        | Voir le message`gcc` dans la sortie du build | Corriger`controller.c`, rebuilder                                                      |
