@@ -9,6 +9,8 @@ services:
     volumes:
       - /dev/input:/dev/input:ro   # périphériques manette
       - /run/udev:/run/udev:ro     # détection des devices par SDL2
+    devices:
+      - /dev/gpiochip0:/dev/gpiochip0 # autorise l'accès au device GPIO
     device_cgroup_rules:
       - 'c 13:* rmw'               # autorise les devices input (major 13)
 

@@ -1,7 +1,7 @@
 #include <includes/controller.h>
 
-int press_button(SDL_Event event) {
-    char *data_to_esp = "";
+char* press_button(SDL_Event event) {
+    const char *data_to_esp = "";
     switch (event.cbutton.button){
         case SDL_CONTROLLER_BUTTON_A : // Bouton Croix appuyé
             data_to_esp = "CroixP\n";
@@ -54,10 +54,10 @@ int press_button(SDL_Event event) {
             break;
         
         default:
-            return EXIT_FAILURE;
+            return "";
         }
         printf("%s", data_to_esp);
-        return EXIT_SUCCESS;
+        return data_to_esp;
 }
 
 int joystick(SDL_Event event) {
@@ -103,8 +103,8 @@ int joystick(SDL_Event event) {
 }
 
 
-int release_button(SDL_Event event) {
-    char *data_to_esp = "";
+char* release_button(SDL_Event event) {
+    const char *data_to_esp = "";
     switch (event.cbutton.button){
         case SDL_CONTROLLER_BUTTON_A : // Bouton Croix relâché
             data_to_esp = "CroixR\n";
@@ -156,8 +156,8 @@ int release_button(SDL_Event event) {
             data_to_esp = "TouchpadR\n";
             break;
         default:
-            return EXIT_FAILURE;
+            return "";
         }
         printf("%s", data_to_esp);
-        return EXIT_SUCCESS;
+        return data_to_esp;
 }

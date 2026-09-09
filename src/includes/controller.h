@@ -3,10 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <gpiod.h>
 
-int release_button(SDL_Event event);
-int press_button(SDL_Event event);
+char* release_button(SDL_Event event);
+char* press_button(SDL_Event event);
 int joystick(SDL_Event event);
+int led_boutons(const char *data_to_esp, struct gpiod_line **led_lines);
 
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
@@ -37,7 +39,7 @@ int joystick(SDL_Event event);
  *       Ensure the socket (`sock`) and the `data_to_esp` variable are properly initialized
  *       before calling this function.
  */
-int release_button(SDL_Event event);
+char* release_button(SDL_Event event);
 
 /**
  * @brief Handles button press events from an SDL controller and printfs corresponding data to an ESP device.
@@ -65,7 +67,7 @@ int release_button(SDL_Event event);
  * @note The function uses the `printf` function to transmit data over a socket.
  *       Ensure the `sock` variable is properly initialized and connected before calling this function.
  */
-int press_button(SDL_Event event);
+char* press_button(SDL_Event event);
 
 /**
  * @brief Handles joystick events and processes input from the controller's axes.
