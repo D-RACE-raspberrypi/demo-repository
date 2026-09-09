@@ -1,0 +1,16 @@
+services:
+  rpi-serv:
+    build: .
+    container_name: drace_serv
+    network_mode: host      # acces direct aux interfaces wifi de l'hote, pas de NAT
+    cap_add:
+      - NET_ADMIN           # requis pour "ip addr" et hostapd
+    restart: unless-stopped
+    environment:
+      AP_IFACE: ${AP_IFACE:-wlx340a33315eaa}   # antenne USB, surchargable : AP_IFACE=... docker compose up -d
+      AP_SSID: drace_wifi
+      AP_PASS: drace_wifi         # 8 caracteres minimum
+      AP_IP: 192.168.4.1
+      AP_DHCP_START: 192.168.4.10
+      AP_DHCP_END: 192.168.4.100
+      AP_CHANNEL: "1"
