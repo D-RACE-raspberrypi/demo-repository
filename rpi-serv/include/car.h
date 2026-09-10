@@ -1,13 +1,8 @@
 #ifndef CAR_H
 #define CAR_H
-
-#include <gpiod.h>
-
+#include "servo.h"
+#include "moteur.h"
 // Numeros de broche BCM des LEDs
-#define LED_GAUCHE 17
-#define LED_DROITE 27
-#define LED_FREIN  22
-#define LED_ACCEL  10
 
 typedef struct Car_t {
     float relative_speed;   // 0.0 to 1.0

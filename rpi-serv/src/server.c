@@ -10,6 +10,9 @@
  * Utilisation : ./serveur_pi <port>
  */
 #include "car.h"
+#include "moteur.h"
+#include "servo.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -58,6 +61,8 @@ static void un_demon_est_mort(int sig) {
 int main(int argc, char *argv[]) {
     Car_t car;
     car_init(&car); // définition de l'objet Car_t avec valeurs initiales
+    moteur_init();
+    servo_init();
 
     setvbuf(stdout, NULL, _IOLBF, 0); // sinon les printf restent invisibles dans docker logs
 
