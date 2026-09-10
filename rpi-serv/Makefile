@@ -1,12 +1,13 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -O2
+CFLAGS = -Wall -Wextra -O2 -Iinclude
+LDLIBS = -lgpiod
 TARGET = serveur_pi
-SRC = src/server.c
+SRC = src/server.c src/car.c
 
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) $(LDLIBS)
 
 clean:
 	rm -f $(TARGET)

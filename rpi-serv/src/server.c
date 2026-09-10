@@ -9,7 +9,7 @@
  *
  * Utilisation : ./serveur_pi <port>
  */
-
+#include "car.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -56,6 +56,9 @@ static void un_demon_est_mort(int sig) {
 }
 
 int main(int argc, char *argv[]) {
+    Car_t car;
+    car_init(&car); // définition de l'objet Car_t avec valeurs initiales
+
     setvbuf(stdout, NULL, _IOLBF, 0); // sinon les printf restent invisibles dans docker logs
 
     if (argc != 2) {
@@ -191,8 +194,10 @@ int main(int argc, char *argv[]) {
             *sep = '\0';
             float valeur = strtof(sep + 1, NULL);
             printf("De %s -> texte=\"%s\" valeur=%.2f\n", ip_expediteur, buffer, valeur);
+            car_reception(&car, (const char *)buffer, (float)valeur);
         } else {
             printf("De %s -> message brut : %s\n", ip_expediteur, buffer);
+            car_reception(&car, (const char *)buffer, (float)0.0);
         }
     }
 

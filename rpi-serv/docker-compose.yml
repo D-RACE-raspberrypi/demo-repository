@@ -5,6 +5,9 @@ services:
     network_mode: host      # acces direct aux interfaces wifi de l'hote, pas de NAT
     cap_add:
       - NET_ADMIN           # requis pour "ip addr" et hostapd
+    # Sur le Pi : acces aux GPIO pour le conteneur (a decommenter, n'existe pas sur PC)
+    devices:
+      - /dev/gpiochip0:/dev/gpiochip0
     restart: unless-stopped
     environment:
       AP_IFACE: ${AP_IFACE:-wlx340a33315eaa}   # antenne USB, surchargable : AP_IFACE=... docker compose up -d
