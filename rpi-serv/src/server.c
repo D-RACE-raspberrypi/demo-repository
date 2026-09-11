@@ -22,8 +22,12 @@
 #include <sys/time.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #define HOSTAPD_CONF "/tmp/hostapd.conf"
+
+static pid_t pid_hostapd = -1;
+static pid_t pid_dnsmasq = -1;
 
 // Valeur d'une variable d'environnement, ou valeur par defaut si absente
 static const char *env_or(const char *name, const char *def) {
@@ -55,17 +59,24 @@ static pid_t spawn(char *const argv[]) {
 // Si hostapd ou dnsmasq meurt, on quitte : Docker relancera tout proprement
 static void un_demon_est_mort(int sig) {
     (void)sig;
-    _exit(1);
+    int status;
+    pid_t pid;
+    // On verifie quel processus fils s'est termine
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+        if (pid == pid_hostapd || pid == pid_dnsmasq) {
+            fprintf(stderr, "Un demon reseau (PID %d) s'est arrete. Fermeture du serveur.\n", pid);
+            _exit(1);
+        }
+    }
 }
 
 int main(int argc, char *argv[]) {
+    setvbuf(stdout, NULL, _IOLBF, 0); // sinon les printf restent invisibles dans docker logs
     Car_t car;
     car_init(&car); // définition de l'objet Car_t avec valeurs initiales
     moteur_init();
     servo_init();
-
-    setvbuf(stdout, NULL, _IOLBF, 0); // sinon les printf restent invisibles dans docker logs
-
+    
     if (argc != 2) {
         fprintf(stderr, "Usage : %s <port>\n", argv[0]);
         return 1;
@@ -131,8 +142,8 @@ int main(int argc, char *argv[]) {
     signal(SIGCHLD, un_demon_est_mort); // apres les system(), avant les spawn()
 
     char *hostapd_argv[] = {"hostapd", HOSTAPD_CONF, NULL};
-    spawn(hostapd_argv);
-    printf("hostapd lance : SSID \"%s\", canal %s\n", ssid, channel);
+    pid_hostapd = spawn(hostapd_argv);
+    printf("hostapd lance (PID %d) : SSID \"%s\", canal %s\n", pid_hostapd, ssid, channel);
     sleep(2); // laisse hostapd monter l'interface avant dnsmasq
 
     // ----- 4. dnsmasq : distribue les adresses IP aux clients (DHCP) -----
@@ -144,8 +155,8 @@ int main(int argc, char *argv[]) {
                             "--log-facility=-",   // logs vers stdout et non syslog
                             "--log-dhcp",
                             arg_iface, arg_range, NULL};
-    spawn(dnsmasq_argv);
-    printf("dnsmasq lance : DHCP de %s a %s\n", dhcp_start, dhcp_end);
+    pid_dnsmasq = spawn(dnsmasq_argv);
+    printf("dnsmasq lance (PID %d) : DHCP de %s a %s\n", pid_dnsmasq, dhcp_start, dhcp_end);
 
     // ----- 5. Reception UDP -----
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -198,10 +209,10 @@ int main(int argc, char *argv[]) {
         if (sep != NULL) {
             *sep = '\0';
             float valeur = strtof(sep + 1, NULL);
-            printf("De %s -> texte=\"%s\" valeur=%.2f\n", ip_expediteur, buffer, valeur);
+            printf("%s -> %s = %.3f\n", ip_expediteur, buffer, valeur);
             car_reception(&car, (const char *)buffer, (float)valeur);
         } else {
-            printf("De %s -> message brut : %s\n", ip_expediteur, buffer);
+            printf("%s -> %s\n", ip_expediteur, buffer);
             car_reception(&car, (const char *)buffer, (float)0.0);
         }
     }

@@ -9,7 +9,7 @@
  *
  * La valeur est automatiquement limitée entre -1 et +1.
  */
-void moteur_init(void);
+int moteur_init(void);
 void moteur_control(float value);
 
 #endif
