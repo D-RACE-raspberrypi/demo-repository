@@ -23,6 +23,8 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <dirent.h>
+#include <limits.h>
 
 #define HOSTAPD_CONF "/tmp/hostapd.conf"
 
@@ -56,6 +58,50 @@ static pid_t spawn(char *const argv[]) {
     return pid;
 }
 
+// Recherche automatique de l'interface Wi-Fi branchee en USB
+// (ignore le wifi interne du Pi 5, qui n'est pas sur bus USB)
+static int trouver_interface_usb_wifi(char *out, size_t out_len) {
+    DIR *d = opendir("/sys/class/net");
+    if (d == NULL) { perror("opendir /sys/class/net"); return -1; }
+
+    struct dirent *entry;
+    int trouve = 0;
+    int nb_candidats = 0;
+
+    while ((entry = readdir(d)) != NULL) {
+        if (entry->d_name[0] == '.') continue;
+
+        char wireless_path[300];
+        snprintf(wireless_path, sizeof(wireless_path),
+                 "/sys/class/net/%s/wireless", entry->d_name);
+        if (access(wireless_path, F_OK) != 0) continue; // pas une interface wifi
+
+        char device_link[300];
+        snprintf(device_link, sizeof(device_link),
+                 "/sys/class/net/%s/device", entry->d_name);
+        char resolved[PATH_MAX];
+        if (realpath(device_link, resolved) == NULL) continue;
+
+        if (strstr(resolved, "/usb") != NULL) {
+            nb_candidats++;
+            if (!trouve) {
+                size_t len = strlen(entry->d_name);
+                if (len >= out_len) len = out_len - 1;
+                memcpy(out, entry->d_name, len);
+                out[len] = '\0';
+                trouve = 1;
+            }
+        }
+    }
+    closedir(d);
+
+    if (nb_candidats > 1) {
+        fprintf(stderr, "Attention : %d antennes USB Wi-Fi detectees, utilisation de \"%s\"\n",
+                nb_candidats, out);
+    }
+    return trouve ? 0 : -1;
+}
+
 // Si hostapd ou dnsmasq meurt, on quitte : Docker relancera tout proprement
 static void un_demon_est_mort(int sig) {
     (void)sig;
@@ -69,14 +115,14 @@ static void un_demon_est_mort(int sig) {
         }
     }
 }
-
 int main(int argc, char *argv[]) {
     setvbuf(stdout, NULL, _IOLBF, 0); // sinon les printf restent invisibles dans docker logs
+
     Car_t car;
     car_init(&car); // définition de l'objet Car_t avec valeurs initiales
     moteur_init();
     servo_init();
-    
+
     if (argc != 2) {
         fprintf(stderr, "Usage : %s <port>\n", argv[0]);
         return 1;
@@ -84,7 +130,6 @@ int main(int argc, char *argv[]) {
     int port = atoi(argv[1]);
 
     // ----- 1. Configuration (surchargable via docker-compose.yml) -----
-    const char *iface      = env_or("AP_IFACE", "wlan0");
     const char *ssid       = env_or("AP_SSID", "PiVoiture");
     const char *pass       = env_or("AP_PASS", "drace_wifi");
     const char *ip         = env_or("AP_IP", "192.168.4.1");
@@ -100,15 +145,37 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    // Attend que l'interface existe (antenne USB debranchee, ou pas encore enumeree au boot)
-    char syspath[128];
-    snprintf(syspath, sizeof(syspath), "/sys/class/net/%s", iface);
-    while (access(syspath, F_OK) != 0) {
-        printf("En attente de l'interface %s (antenne USB branchee ?)...\n", iface);
-        sleep(3);
+    // ----- 2. Determination de l'interface Wi-Fi -----
+    // Si AP_IFACE est explicitement fournie, on la respecte (utile pour forcer un nom en test).
+    // Sinon, on detecte automatiquement l'antenne Wi-Fi USB, quel que soit son nom ou son port.
+    char iface_buf[64];
+    const char *iface_env = getenv("AP_IFACE");
+    const char *iface;
+
+    if (iface_env != NULL && iface_env[0] != '\0') {
+        iface = iface_env;
+        printf("Interface forcee via AP_IFACE : %s\n", iface);
+        char syspath[128];
+        snprintf(syspath, sizeof(syspath), "/sys/class/net/%s", iface);
+        while (access(syspath, F_OK) != 0) {
+            printf("En attente de l'interface %s (antenne USB branchee ?)...\n", iface);
+            sleep(3);
+        }
+    } else {
+        printf("Recherche automatique de l'antenne Wi-Fi USB...\n");
+        int tentatives = 0;
+        while (trouver_interface_usb_wifi(iface_buf, sizeof(iface_buf)) != 0) {
+            printf("Aucune antenne Wi-Fi USB detectee, nouvelle tentative (%d)...\n", ++tentatives);
+            sleep(3);
+        }
+        iface = iface_buf;
+        printf("Antenne detectee automatiquement : %s\n", iface);
     }
 
-    // ----- 2. Adresse IP statique sur l'interface de l'AP -----
+    char syspath[128];
+    snprintf(syspath, sizeof(syspath), "/sys/class/net/%s", iface);
+
+    // ----- 3. Adresse IP statique sur l'interface de l'AP -----
     char cmd[256];
     snprintf(cmd, sizeof(cmd),
              "ip link set %s up && ip addr flush dev %s && ip addr add %s/24 dev %s",
@@ -119,7 +186,7 @@ int main(int argc, char *argv[]) {
     }
     printf("Interface %s configuree en %s/24\n", iface, ip);
 
-    // ----- 3. hostapd : cree le reseau Wi-Fi -----
+    // ----- 4. hostapd : cree le reseau Wi-Fi -----
     FILE *f = fopen(HOSTAPD_CONF, "w");
     if (f == NULL) { perror(HOSTAPD_CONF); return 1; }
     fprintf(f,
@@ -146,7 +213,7 @@ int main(int argc, char *argv[]) {
     printf("hostapd lance (PID %d) : SSID \"%s\", canal %s\n", pid_hostapd, ssid, channel);
     sleep(2); // laisse hostapd monter l'interface avant dnsmasq
 
-    // ----- 4. dnsmasq : distribue les adresses IP aux clients (DHCP) -----
+    // ----- 5. dnsmasq : distribue les adresses IP aux clients (DHCP) -----
     char arg_iface[64], arg_range[128];
     snprintf(arg_iface, sizeof(arg_iface), "--interface=%s", iface);
     snprintf(arg_range, sizeof(arg_range), "--dhcp-range=%s,%s,255.255.255.0,12h", dhcp_start, dhcp_end);
@@ -158,7 +225,7 @@ int main(int argc, char *argv[]) {
     pid_dnsmasq = spawn(dnsmasq_argv);
     printf("dnsmasq lance (PID %d) : DHCP de %s a %s\n", pid_dnsmasq, dhcp_start, dhcp_end);
 
-    // ----- 5. Reception UDP -----
+    // ----- 6. Reception UDP -----
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
         perror("socket");

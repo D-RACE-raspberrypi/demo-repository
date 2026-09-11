@@ -9,6 +9,8 @@
  *
  * La valeur est automatiquement limitée entre -1 et +1.
  */
+#include <stdlib.h>
+
 void servo_init(void);
 void servo_control(float value);
 

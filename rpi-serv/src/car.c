@@ -22,22 +22,10 @@ void car_reception(Car_t *car, const char *actionner, float valeur) {
         if (valeur > 1.0) {
             valeur = 1.0;
         }
-        car->direction = valeur;
+        car->direction = -valeur;
         printf("CAR : direction %0.3f\n", car->absolute_speed);
         servo_control(car->direction);
-    
-    } else if (strcmp(actionner, "GG") == 0) {
-        // Gachette gauche (frein)
-        if (valeur < 0.0){
-            valeur = 0.0;
-        }
-        if (valeur > 1.0) {
-            valeur = 1.0;
-        }
-        car->relative_speed = -valeur; // Freinage 
-        car->absolute_speed = car->relative_speed * car->gear / 4.0; // Mise à jour de la vitesse absolue
-        printf("CAR : freinage a %0.3f\n", car->absolute_speed);
-        moteur_control(car->absolute_speed);
+        
     } else if (strcmp(actionner, "GD") == 0) {
         // Gachette droite (acceleration)
         if (valeur < 0.0) {
@@ -49,7 +37,22 @@ void car_reception(Car_t *car, const char *actionner, float valeur) {
         car->relative_speed = valeur; // Acceleration
         car->absolute_speed = car->relative_speed * car->gear / 4.0; // Mise à jour de la vitesse absolue
         moteur_control(car->absolute_speed);
-        printf("CAR : acceleration a %0.3f\n", car->absolute_speed);
+        printf("CAR : Accelere a %0.3f\n", car->absolute_speed);
+    } else if (strcmp(actionner, "GG") == 0) {
+        // Gachette gauche (braking)
+        if (valeur < 0.0) {
+            valeur = 0.0;
+        }
+        if (valeur > 1.0) {
+            valeur = 1.0;
+        }
+        car->relative_speed -= valeur; // Braking reduces relative speed
+        if (car->relative_speed < 0.0) {
+            car->relative_speed = 0.0;
+        }
+        car->absolute_speed = car->relative_speed * car->gear / 4.0; // Mise à jour de la vitesse absolue
+        moteur_control(car->absolute_speed);
+        printf("CAR : Recule a %0.3f\n", car->absolute_speed);
     } else if (strcmp(actionner, "CroixP") == 0) {
         car->gear = 1;
         car->absolute_speed = car->relative_speed * car->gear / 4.0; // Mise à jour de la vitesse absolue

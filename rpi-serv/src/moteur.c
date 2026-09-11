@@ -25,7 +25,6 @@ void moteur_control(float commande) {
 
 
 int moteur_init(void) {
-    float commande;
     printf("\nInitialisation du PWM moteur...\n");
     system("echo 0 > /sys/class/pwm/pwmchip0/export 2>/dev/null");
     usleep(100000);
