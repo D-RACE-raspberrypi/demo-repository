@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <unistd.h>
-#include "servo_simple.h"
+#include "servo.h"
 
 #define PWM_PATH "/sys/class/pwm/pwmchip0"
 #define PERIOD_NS 20000000L // 20 ms => 50 Hz
 
 #define ANGLE_MIN_DEG 55
 #define ANGLE_MAX_DEG 145
-#define ANGLE_CENTER_DEG ((ANGLE_MIN_DEG + ANGLE_MAX_DEG) / 2)       
-#define ANGLE_HALF_RANGE_DEG ((ANGLE_MAX_DEG - ANGLE_MIN_DEG) / 2.0f) 
+#define ANGLE_CENTER_DEG ((ANGLE_MIN_DEG + ANGLE_MAX_DEG) / 2)     
+#define ANGLE_HALF_RANGE_DEG ((ANGLE_MAX_DEG - ANGLE_MIN_DEG) / 2.0f)
 
 static int initialized = 0; 
 
