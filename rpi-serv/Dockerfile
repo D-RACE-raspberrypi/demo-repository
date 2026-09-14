@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gpiod \
     libgpiod-dev \
     iproute2 \
+    hostapd \
+    dnsmasq \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
