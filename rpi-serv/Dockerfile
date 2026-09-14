@@ -7,7 +7,8 @@ COPY src/ src/
 RUN gcc -Wall -Wextra -O2 -Iinclude src/server.c src/car.c src/moteur.c src/servo.c src/utils.c -o serveur_pi -lgpiod
 
 FROM debian:trixie-slim
-RUN apt-get update && apt-get install -y --no-install-recommends hostapd dnsmasq iproute2 \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gpiod \
     libgpiod3 \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
