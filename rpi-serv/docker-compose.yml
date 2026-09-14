@@ -13,7 +13,7 @@ services:
       - /usr/bin/pinctrl:/usr/bin/pinctrl:ro
     restart: unless-stopped
     environment:
-      AP_IFACE: ${AP_IFACE:-wlx340a33315eaa}   # antenne USB, surchargable : AP_IFACE=... docker compose up -d
+      AP_IFACE: ${AP_IFACE:-}   # antenne USB, surchargable : AP_IFACE=... docker compose up -d
       AP_SSID: drace_wifi
       AP_PASS: drace_wifi         # 8 caracteres minimum
       AP_IP: 192.168.4.1
