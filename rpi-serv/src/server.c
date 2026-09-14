@@ -42,7 +42,7 @@ static const char *env_or(const char *name, const char *def) {
 static void check_ip(const char *label, const char *ip) {
     struct in_addr tmp;
     if (inet_pton(AF_INET, ip, &tmp) != 1) {
-        debug_print("Erreur : %s=\"%s\" n'est pas une adresse IPv4 valide\n", label, ip);
+        debug_printf("Erreur : %s=\"%s\" n'est pas une adresse IPv4 valide\n", label, ip);
         exit(1);
     }
 }
@@ -74,12 +74,12 @@ static int trouver_interface_usb_wifi(char *out, size_t out_len) {
 
         char wireless_path[300];
         snprintf(wireless_path, sizeof(wireless_path),
-                 "/sys/class/net/%s/wireless", entry->d_name);
+            "/sys/class/net/%s/wireless", entry->d_name);
         if (access(wireless_path, F_OK) != 0) continue; // pas une interface wifi
 
         char device_link[300];
         snprintf(device_link, sizeof(device_link),
-                 "/sys/class/net/%s/device", entry->d_name);
+            "/sys/class/net/%s/device", entry->d_name);
         char resolved[PATH_MAX];
         if (realpath(device_link, resolved) == NULL) continue;
 
@@ -155,22 +155,22 @@ int main(int argc, char *argv[]) {
 
     if (iface_env != NULL && iface_env[0] != '\0') {
         iface = iface_env;
-        debug_print("Interface forcee via AP_IFACE : %s\n", iface);
+        debug_printf("Interface forcee via AP_IFACE : %s\n", iface);
         char syspath[128];
         snprintf(syspath, sizeof(syspath), "/sys/class/net/%s", iface);
         while (access(syspath, F_OK) != 0) {
-            debug_print("En attente de l'interface %s (antenne USB branchee ?)...\n", iface);
+            debug_printf("En attente de l'interface %s (antenne USB branchee ?)...\n", iface);
             sleep(3);
         }
     } else {
-        debug_print("Recherche automatique de l'antenne Wi-Fi USB...\n");
+        debug_printf("Recherche automatique de l'antenne Wi-Fi USB...\n");
         int tentatives = 0;
         while (trouver_interface_usb_wifi(iface_buf, sizeof(iface_buf)) != 0) {
-            debug_print("Aucune antenne Wi-Fi USB detectee, nouvelle tentative (%d)...\n", ++tentatives);
+            debug_printf("Aucune antenne Wi-Fi USB detectee, nouvelle tentative (%d)...\n", ++tentatives);
             sleep(3);
         }
         iface = iface_buf;
-        debug_print("Antenne detectee automatiquement : %s\n", iface);
+        debug_printf("Antenne detectee automatiquement : %s\n", iface);
     }
 
     char syspath[128];
@@ -179,13 +179,13 @@ int main(int argc, char *argv[]) {
     // ----- 3. Adresse IP statique sur l'interface de l'AP -----
     char cmd[256];
     snprintf(cmd, sizeof(cmd),
-             "ip link set %s up && ip addr flush dev %s && ip addr add %s/24 dev %s",
-             iface, iface, ip, iface);
+        "ip link set %s up && ip addr flush dev %s && ip addr add %s/24 dev %s",
+        iface, iface, ip, iface);
     if (system(cmd) != 0) {
         fprintf(stderr, "Erreur : impossible de configurer %s (interface absente ? cap NET_ADMIN ?)\n", iface);
         return 1;
     }
-    debug_print("Interface %s configuree en %s/24\n", iface, ip);
+    debug_printf("Interface %s configuree en %s/24\n", iface, ip);
 
     // ----- 4. hostapd : cree le reseau Wi-Fi -----
     FILE *f = fopen(HOSTAPD_CONF, "w");
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
 
     char *hostapd_argv[] = {"hostapd", HOSTAPD_CONF, NULL};
     pid_hostapd = spawn(hostapd_argv);
-    debug_print("hostapd lance (PID %d) : SSID \"%s\", canal %s\n", pid_hostapd, ssid, channel);
+    debug_printf("hostapd lance (PID %d) : SSID \"%s\", canal %s\n", pid_hostapd, ssid, channel);
     sleep(2); // laisse hostapd monter l'interface avant dnsmasq
 
     // ----- 5. dnsmasq : distribue les adresses IP aux clients (DHCP) -----
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
                             "--log-dhcp",
                             arg_iface, arg_range, NULL};
     pid_dnsmasq = spawn(dnsmasq_argv);
-    debug_print("dnsmasq lance (PID %d) : DHCP de %s a %s\n", pid_dnsmasq, dhcp_start, dhcp_end);
+    debug_printf("dnsmasq lance (PID %d) : DHCP de %s a %s\n", pid_dnsmasq, dhcp_start, dhcp_end);
 
     // ----- 6. Reception UDP -----
     int sock = socket(AF_INET, SOCK_DGRAM, 0);
@@ -249,7 +249,7 @@ int main(int argc, char *argv[]) {
     struct timeval tv = { .tv_sec = 5, .tv_usec = 0 };
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
-    debug_print("En ecoute UDP sur le port %d...\n", port);
+    debug_printf("En ecoute UDP sur le port %d...\n", port);
 
     char buffer[256];
     struct sockaddr_in expediteur;
@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
     while (1) {
         socklen_t len = sizeof(expediteur);
         ssize_t recus = recvfrom(sock, buffer, sizeof(buffer) - 1, 0,
-                                 (struct sockaddr *)&expediteur, &len);
+            (struct sockaddr *)&expediteur, &len);
         if (recus < 0) {
             if (access(syspath, F_OK) != 0) {
                 fprintf(stderr, "Interface %s disparue (antenne debranchee ?) : redemarrage\n", iface);
@@ -277,10 +277,10 @@ int main(int argc, char *argv[]) {
         if (sep != NULL) {
             *sep = '\0';
             float valeur = strtof(sep + 1, NULL);
-            debug_print("%s -> %s = %.3f\n", ip_expediteur, buffer, valeur);
+            debug_printf("%s -> %s = %.3f\n", ip_expediteur, buffer, valeur);
             car_reception(&car, (const char *)buffer, (float)valeur);
         } else {
-            debug_print("%s -> %s\n", ip_expediteur, buffer);
+            debug_printf("%s -> %s\n", ip_expediteur, buffer);
             car_reception(&car, (const char *)buffer, (float)0.0);
         }
     }

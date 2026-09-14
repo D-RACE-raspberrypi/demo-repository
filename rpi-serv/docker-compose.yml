@@ -13,6 +13,7 @@ services:
       - /usr/bin/pinctrl:/usr/bin/pinctrl:ro
     restart: unless-stopped
     environment:
+      DEBUG_MOD: ${DEBUG_MOD:-0} # active le mode debug si DEBUG_MOD est defini et different de 0
       AP_IFACE: ${AP_IFACE:-}   # antenne USB, surchargable : AP_IFACE=... docker compose up -d
       AP_SSID: drace_wifi
       AP_PASS: drace_wifi         # 8 caracteres minimum

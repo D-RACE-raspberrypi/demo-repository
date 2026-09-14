@@ -63,44 +63,42 @@ void moteur_control(float commande)
     }
 
     if (side == -1 && last_side == 1) {
-
-        debug_print("[Changement de sens detecte : sequence de freinage automatique...]\n");
+        debug_printf("[Changement de sens detecte : sequence de freinage automatique...]\n");
         ramp_to(PULSE_NEUTRAL_NS);
         usleep(400000);
         ramp_to(pulse_ns);   
         usleep(500000);
         ramp_to(PULSE_NEUTRAL_NS);
         usleep(300000);
-     
     }
 
     ramp_to(pulse_ns);
     last_side = side;
 
-    debug_print("Commande = %.2f -> impulsion finale = %.3f ms\n", commande, pulse_ns / 1000000.0f);
+    debug_printf("Commande = %.2f -> impulsion finale = %.3f ms\n", commande, pulse_ns / 1000000.0f);
 }
 
 
 int moteur_init(void) {
-    debug_print("\nInitialisation du PWM moteur...\n");
+    debug_printf("\nInitialisation du PWM moteur...\n");
     system("echo 0 > /sys/class/pwm/pwmchip0/export 2>/dev/null");
     usleep(100000);
     system("echo 0 > /sys/class/pwm/pwmchip0/pwm0/enable 2>/dev/null");
     system("echo 20000000 > /sys/class/pwm/pwmchip0/pwm0/period");
     system("echo 1500000 > /sys/class/pwm/pwmchip0/pwm0/duty_cycle");
-    debug_print("Configuration GPIO12 -> PWM0_CHAN0...\n");
+    debug_printf("Configuration GPIO12 -> PWM0_CHAN0...\n");
     system("pinctrl set 12 a0");
-    debug_print("\nEtat du GPIO12 :\n");
+    debug_printf("\nEtat du GPIO12 :\n");
     system("pinctrl get 12");
     system("echo 1 > /sys/class/pwm/pwmchip0/pwm0/enable");
-    debug_print("\nPWM actif : 50 Hz\n");
-    debug_print("Periode : 20 ms\n");
-    debug_print("GPIO : 12\n");
-    debug_print("Fonction : ALT0 (a0)\n");
-    debug_print("PWM : PWM0_CHAN0\n");
-    debug_print("Canal Linux : pwm0\n");
-    debug_print("Moteur au neutre : 1.500 ms\n");
-    debug_print("\nInitialisation de l'ESC au neutre...\n");
+    debug_printf("\nPWM actif : 50 Hz\n");
+    debug_printf("Periode : 20 ms\n");
+    debug_printf("GPIO : 12\n");
+    debug_printf("Fonction : ALT0 (a0)\n");
+    debug_printf("PWM : PWM0_CHAN0\n");
+    debug_printf("Canal Linux : pwm0\n");
+    debug_printf("Moteur au neutre : 1.500 ms\n");
+    debug_printf("\nInitialisation de l'ESC au neutre...\n");
     sleep(3);
     return 0;
 }

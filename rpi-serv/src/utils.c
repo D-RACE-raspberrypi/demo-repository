@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include "utils.h"
 
-void debug_print(const char* format, ...) {
+void debug_printf(const char* format, ...) {
     if (!(DEBUG)) {
         return;
     }
