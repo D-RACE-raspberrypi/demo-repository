@@ -32,12 +32,6 @@
 static pid_t pid_hostapd = -1;
 static pid_t pid_dnsmasq = -1;
 
-// Valeur d'une variable d'environnement, ou valeur par defaut si absente
-static const char *env_or(const char *name, const char *def) {
-    const char *v = getenv(name);
-    return (v != NULL && v[0] != '\0') ? v : def;
-}
-
 // Verifie qu'une chaine est bien une adresse IPv4 (evite les fautes de frappe)
 static void check_ip(const char *label, const char *ip) {
     struct in_addr tmp;
@@ -70,18 +64,21 @@ static int trouver_interface_usb_wifi(char *out, size_t out_len) {
     int nb_candidats = 0;
 
     while ((entry = readdir(d)) != NULL) {
-        if (entry->d_name[0] == '.') continue;
+        if (entry->d_name[0] == '.') 
+            continue;
 
         char wireless_path[300];
         snprintf(wireless_path, sizeof(wireless_path),
             "/sys/class/net/%s/wireless", entry->d_name);
-        if (access(wireless_path, F_OK) != 0) continue; // pas une interface wifi
+        if (access(wireless_path, F_OK) != 0) 
+            continue; // pas une interface wifi
 
         char device_link[300];
         snprintf(device_link, sizeof(device_link),
             "/sys/class/net/%s/device", entry->d_name);
         char resolved[PATH_MAX];
-        if (realpath(device_link, resolved) == NULL) continue;
+        if (realpath(device_link, resolved) == NULL) 
+            continue;
 
         if (strstr(resolved, "/usb") != NULL) {
             nb_candidats++;
@@ -215,7 +212,7 @@ int main(int argc, char *argv[]) {
     sleep(2); // laisse hostapd monter l'interface avant dnsmasq
 
     // ----- 5. dnsmasq : distribue les adresses IP aux clients (DHCP) -----
-    char arg_iface[64], arg_range[128];
+    char arg_iface[128], arg_range[128];
     snprintf(arg_iface, sizeof(arg_iface), "--interface=%s", iface);
     snprintf(arg_range, sizeof(arg_range), "--dhcp-range=%s,%s,255.255.255.0,12h", dhcp_start, dhcp_end);
     char *dnsmasq_argv[] = {"dnsmasq", "--keep-in-foreground", "--bind-interfaces",

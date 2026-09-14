@@ -60,6 +60,6 @@ void servo_control(float value) {
     if (angle > ANGLE_MAX_DEG) {
         angle = ANGLE_MAX_DEG;
     }
-    debug_print("angle : %d\n", angle);
+    debug_printf("angle : %d\n", angle);
     write_sysfs(PWM_PATH "/pwm1/duty_cycle", angle_to_duty_ns(angle));
 }

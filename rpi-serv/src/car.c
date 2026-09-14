@@ -23,8 +23,9 @@ void car_update_absolute_speed(Car_t *car) {    // Mise à jour de la vitesse ab
 }
 
 void car_display_state(Car_t *car) {  // Affichage de l'état actuel de la voiture
-    if (DEBUG) {
-        return;           // Efface l'écran avant d'afficher l'état
+    int debug = env_or("DEBUG_MOD", "0")[0] != '\0' && env_or("DEBUG_MOD", "0")[0] != '0';
+    if (debug) {
+        return;
     }
 
     printf("Etat de la voiture :\n");

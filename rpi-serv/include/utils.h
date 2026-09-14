@@ -1,8 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#define DEBUG env_or("DEBUG_MOD", 0);
-
 #define RED_form "\033[31m"
 #define GREEN_form "\033[32m"
 #define BLUE_form "\033[34m"
@@ -14,6 +12,8 @@
 #define ITAL_form "\033[3m"
 
 void debug_printf(const char *format, ...);
+
+const char *env_or(const char *name, const char *def);
 
 #define UTILS
 
