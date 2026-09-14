@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "servo.h"
+#include "utils.h"
 
 #define PWM_PATH "/sys/class/pwm/pwmchip0"
 #define PERIOD_NS 20000000L // 20 ms => 50 Hz
@@ -59,6 +60,6 @@ void servo_control(float value) {
     if (angle > ANGLE_MAX_DEG) {
         angle = ANGLE_MAX_DEG;
     }
-    printf("angle : %d", angle);
+    debug_print("angle : %d\n", angle);
     write_sysfs(PWM_PATH "/pwm1/duty_cycle", angle_to_duty_ns(angle));
 }
