@@ -18,4 +18,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 COPY --from=build /app/serveur_pi .
 
-CMD ["./serveur_pi"]
+CMD ["./serveur_pi", "5000"]
