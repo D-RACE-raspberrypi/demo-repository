@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y gcc make libgpiod-dev
 WORKDIR /app
 COPY include/ include/
 COPY src/ src/
-RUN gcc -Wall -Wextra -O2 -Iinclude src/server.c src/car.c src/moteur.c src/servo.c -o serveur_pi -lgpiod
+RUN gcc -Wall -Wextra -O2 -Iinclude src/server.c src/car.c src/moteur.c src/servo.c src/utils.c -o serveur_pi -lgpiod
 
 FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends hostapd dnsmasq iproute2 \

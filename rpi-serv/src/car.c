@@ -1,6 +1,8 @@
 #include "car.h"
+#include "utils.h"
 #include <stdio.h>
 #include <string.h>
+
 
 Car_t* car_init(Car_t *car) {
     car -> relative_speed   = 0.0;
@@ -24,12 +26,12 @@ void car_display_state(Car_t *car) {  // Affichage de l'état actuel de la voitu
     printf("\033[H\033[J");           // Efface l'écran avant d'afficher l'état
 
     printf("Etat de la voiture :\n");
-    printf("  Vitesse relative : %0.3f\n", car->relative_speed);
-    printf("  Direction : %0.3f\n", car->direction);
-    printf("  Rapport de vitesse : %d\n", car->gear);
-    printf("  Vitesse absolue : %0.3f\n", car->absolute_speed);
-    printf("  Gachette accel : %0.3f\n", car->trigger_accel);
-    printf("  Gachette brake : %0.3f\n", car->trigger_brake);
+    printf("   Vitesse relative : %s %0.3f %s\n", BLUE_form, car->relative_speed, RESET_form);
+    printf("   Direction : %s %0.3f %s\n", BLUE_form, car->direction, RESET_form);
+    printf("   Rapport de vitesse : %s %d %s\n", BLUE_form, car->gear, RESET_form);
+    printf("   Vitesse absolue : %s %0.3f %s\n", MAGENTA_form, car->absolute_speed, RESET_form);
+    printf("   Gachette accel : %s %0.3f %s\n", CYAN_form, car->trigger_accel, RESET_form);
+    printf("   Gachette brake : %s %0.3f %s\n", CYAN_form, car->trigger_brake, RESET_form);
     fflush(stdout); // Assurez-vous que l'affichage est immédiatement visible
 }
 
