@@ -275,10 +275,10 @@ int main(int argc, char *argv[]) {
             *sep = '\0';
             float valeur = strtof(sep + 1, NULL);
             debug_printf("%s -> %s = %.3f\n", ip_expediteur, buffer, valeur);
-            car_reception(&car, (const char *)buffer, (float)valeur);
+            car_reception(&car, (const char *)buffer);
         } else {
             debug_printf("%s -> %s\n", ip_expediteur, buffer);
-            car_reception(&car, (const char *)buffer, (float)0.0);
+            car_reception(&car, (const char *)buffer);
         }
     }
 

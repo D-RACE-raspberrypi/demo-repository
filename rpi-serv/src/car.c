@@ -39,76 +39,53 @@ void car_display_state(Car_t *car) {  // Affichage de l'état actuel de la voitu
     fflush(stdout);
 }
 
-void car_reception(Car_t *car, const char *actionner, float valeur) {
-    if (strcmp(actionner, "JGX") == 0) {
-        // Joystick gauche X (direction)
-        if (valeur < -1.0) {
-            valeur = -1.0; 
-        }
-        if (valeur > 1.0) {
-            valeur = 1.0;
-        }
-        car->direction = -valeur;
-        // printf("CAR : direction %0.3f\n", car->direction);
-        servo_control(car->direction);
-        
-    } else if (strcmp(actionner, "GD") == 0) {
-        // Gachette droite (acceleration)
-        if (valeur < 0.0) {
-            valeur = 0.0;
-        }
-        if (valeur > 1.0) {
-            valeur = 1.0;
-        }
-        car->trigger_accel = valeur; // Enregistre la valeur de la gachette pour l'accélération
-        car->relative_speed = car->trigger_accel - car->trigger_brake; // Acceleration
-        if (car->relative_speed > 1.0) {
-            car->relative_speed = 1.0;
-        }
-        car_update_absolute_speed(car); // Mise à jour de la vitesse absolue
-        // printf("CAR : Accelere a %0.3f\n", car->absolute_speed);
-    } 
-      else if (strcmp(actionner, "GG") == 0) {
-        // Gachette gauche (braking)
-        if (valeur < 0.0) {
-            valeur = 0.0;
-        }
-        if (valeur > 1.0) {
-            valeur = 1.0;
-        }
-        car->trigger_brake = valeur; // Enregistre la valeur de la gachette pour le freinage
-        car->relative_speed = car->trigger_accel - car->trigger_brake; // Braking reduces relative speed
-        if (car->relative_speed < -1.0) {
-            car->relative_speed = -1.0;
-        }
-        car_update_absolute_speed(car); // Mise à jour de la vitesse absolue
-        // printf("CAR : Recule a %0.3f\n", car->absolute_speed);
-    } 
-      else if (strcmp(actionner, "CroixP") == 0) {
-        car->gear = 1;
-        car_update_absolute_speed(car); // Mise à jour de la vitesse absolue
-        // printf("CAR : Rapport %d\n", car->gear);
-    } 
-      else if (strcmp(actionner, "CarreP") == 0) {
-        car->gear = 2;
-        car_update_absolute_speed(car); // Mise à jour de la vitesse absolue
-        // printf("CAR : Rapport %d\n", car->gear);
-    } 
-      else if (strcmp(actionner, "TriangleP") == 0) {
-        car->gear = 3;
-        car_update_absolute_speed(car); // Mise à jour de la vitesse absolue
-        // printf("CAR : Rapport %d\n", car->gear);
-    } 
-      else if (strcmp(actionner, "RondP") == 0) {
-        car->gear = 4;
-        car_update_absolute_speed(car); // Mise à jour de la vitesse absolue
-        // printf("CAR : Rapport %d\n", car->gear);
-    } 
-      else {
-        // Actionneur inconnu
-        return;
-    }
-    car_display_state(car); // Affiche l'état actuel de la voiture après la réception des données
-    return;
-}
+void car_reception(Car_t *car, const char *payload) {
+    // Extraction des valeurs de la charge utile (payload)
+    char *ptr;
 
+    // Extraction de la direction (JGX)
+    if ((ptr = strstr(payload, "JGX:")) != NULL) {
+        car->direction = atof(ptr + 4);             // +4 pour sauter "JGX:"
+    }
+
+    // Extraction de la gachette d'acceleration (GD)
+    if ((ptr = strstr(payload, "GD:")) != NULL) {
+        car->trigger_accel = atof(ptr + 3);         // +3 pour sauter "GD:"
+    }
+
+    // Extraction de la gachette de freinage (GG)
+    if ((ptr = strstr(payload, "GG:")) != NULL) {
+        car->trigger_brake = atof(ptr + 3);         // +3 pour sauter "GG:"
+    }
+
+    // Extraction du rapport de vitesse (Gear)
+    if ((ptr = strstr(payload, "Croix:P")) != NULL) {
+        car->gear = 1;
+    } else if ((ptr = strstr(payload, "Carre:P")) != NULL) {
+        car->gear = 2;
+    } else if ((ptr = strstr(payload, "Triangle:P")) != NULL) {
+        car->gear = 3;
+    } else if ((ptr = strstr(payload, "Rond:P")) != NULL) {
+        car->gear = 4;
+    }
+
+    // Sécurité des valeurs pour la direction
+    if (car->direction < -1.0) {
+        car->direction = -1.0;
+    } else if (car->direction > 1.0) {
+        car->direction = 1.0;
+    }
+    
+    // Calcul de la vitesse relative en fonction des gachettes d'acceleration et de freinage et sécurité des valeurs
+    car->relative_speed = car->trigger_accel - car->trigger_brake;
+    if (car->relative_speed < -1.0) {
+        car->relative_speed = -1.0;
+    } else if (car->relative_speed > 1.0) {
+        car->relative_speed = 1.0;
+    }
+
+    // Mise à jour de la direction du servo et de la vitesse absolue du moteur et affichage de l'état actuel de la voiture
+    servo_control(car->direction);
+    car_update_absolute_speed(car);
+    car_display_state(car);
+}
