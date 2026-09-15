@@ -17,13 +17,16 @@ echo "Installing Docker packages..."
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo usermod -aG docker $USER
 echo "Adding current user to the Docker group..."
-newgrp docker
 echo "Docker installation complete."
+# pour vérifier :
+cat /etc/apt/sources.list.d/docker.list
 
 # Git clone
 echo "Cloning demo repository..."
 git clone https://github.com/D-RACE-raspberrypi/demo-repository.git
 echo "Demo repository cloned."
+# pour vérifier :
+cat demo-repository/rpi-serv/docker-compose.yml | grep image
 
 # Service
 echo "Setting up rpi-serv systemd service..."
@@ -49,12 +52,21 @@ sudo systemctl daemon-reload
 sudo systemctl enable rpi-serv.service
 sudo systemctl start rpi-serv.service
 echo "rpi-serv service started."
+# pour vérifier :
+
 
 # add dtoverlay for pwm
 echo "Adding dtoverlay for PWM..."
 sudo sed -i '/^dtoverlay=pwm2-chan/d' /boot/config.txt
 echo "dtoverlay=pwm2-chan" | sudo tee -a /boot/config.txt
 echo "dtoverlay for PWM added."
+# pour vérifier : 
+cat /boot/config.txt | grep dtoverlay=pwm2-chan
 
 # End of installation script
 echo "  Installation script complete."
+
+# Lance le docker 
+echo "Starting rpi-serv Docker container..."
+sudo docker compose -f /home/drace/demo-repository/rpi-serv/docker-compose.yml up -d
+echo "rpi-serv Docker container started."

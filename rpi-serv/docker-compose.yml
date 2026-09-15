@@ -15,7 +15,7 @@ services:
       - /usr/lib/aarch64-linux-gnu/libgpiolib.so.0:/usr/lib/aarch64-linux-gnu/libgpiolib.so.0:ro
     restart: unless-stopped
     environment:
-      DEBUG_MOD: ${DEBUG_MOD:-0} # active le mode debug si DEBUG_MOD est defini et different de 0
+      DEBUG: ${DEBUG:-0} # active le mode debug si DEBUG_MOD est defini et different de 0
       AP_IFACE: ${AP_IFACE:-}   # antenne USB, surchargable : AP_IFACE=... docker compose up -d
       AP_SSID: drace_wifi
       AP_PASS: drace_wifi         # 8 caracteres minimum
