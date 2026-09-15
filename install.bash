@@ -50,5 +50,11 @@ sudo systemctl enable rpi-serv.service
 sudo systemctl start rpi-serv.service
 echo "rpi-serv service started."
 
+# add dtoverlay for pwm
+echo "Adding dtoverlay for PWM..."
+sudo sed -i '/^dtoverlay=pwm2-chan/d' /boot/config.txt
+echo "dtoverlay=pwm2-chan" | sudo tee -a /boot/config.txt
+echo "dtoverlay for PWM added."
+
 # End of installation script
 echo "  Installation script complete."

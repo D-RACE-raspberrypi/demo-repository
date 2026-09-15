@@ -23,18 +23,19 @@ void car_update_absolute_speed(Car_t *car) {    // Mise à jour de la vitesse ab
 }
 
 void car_display_state(Car_t *car) {  // Affichage de l'état actuel de la voiture
-    int debug = env_or("DEBUG_MOD", "0")[0] != '\0' && env_or("DEBUG_MOD", "0")[0] != '0';
+    int debug = env_or("DEBUG", "0")[0] != '\0' && env_or("DEBUG", "0")[0] != '0';
     if (debug) {
         return;
     }
 
+    printf("\033[H\033[J");
     printf("Etat de la voiture :\n");
-    printf("   Vitesse relative : %s %0.3f %s\n", BLUE_form, car->relative_speed, RESET_form);
-    printf("   Direction : %s %0.3f %s\n", BLUE_form, car->direction, RESET_form);
-    printf("   Rapport de vitesse : %s %d %s\n", BLUE_form, car->gear, RESET_form);
+    printf("   Vitesse relative : %s %0.3f %s\n", CYAN_form, car->relative_speed, RESET_form);
+    printf("   Direction : %s %0.3f %s\n", CYAN_form, car->direction, RESET_form);
+    printf("   Rapport de vitesse : %s %d %s\n", CYAN_form, car->gear, RESET_form);
     printf("   Vitesse absolue : %s %0.3f %s\n", MAGENTA_form, car->absolute_speed, RESET_form);
-    printf("   Gachette accel : %s %0.3f %s\n", CYAN_form, car->trigger_accel, RESET_form);
-    printf("   Gachette brake : %s %0.3f %s\n", CYAN_form, car->trigger_brake, RESET_form);
+    printf("   Gachette accel : %s %0.3f %s\n", GREEN_form, car->trigger_accel, RESET_form);
+    printf("   Gachette brake : %s %0.3f %s\n", GREEN_form, car->trigger_brake, RESET_form);
     fflush(stdout);
 }
 

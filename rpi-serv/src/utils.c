@@ -4,7 +4,7 @@
 #include "utils.h"
 
 void debug_printf(const char* format, ...) {
-    int debug = env_or("DEBUG_MOD", "0")[0] != '\0' && env_or("DEBUG_MOD", "0")[0] != '0';
+    int debug = env_or("DEBUG", "0")[0] != '\0' && env_or("DEBUG", "0")[0] != '0';
     if (!debug) {
         return;
     }
