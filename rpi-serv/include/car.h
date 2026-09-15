@@ -15,7 +15,7 @@ typedef struct Car_t {
 
 Car_t* car_init(Car_t *car);
 
-void car_reception(Car_t *car, const char *actionner, float valeur);
+void car_reception(Car_t *car, const char *payload);
 
 void car_display_state(Car_t *car);
 
