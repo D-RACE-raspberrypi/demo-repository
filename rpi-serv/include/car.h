@@ -19,6 +19,8 @@ void car_reception(Car_t *car, const char *payload);
 
 void car_display_state(Car_t *car);
 
+void car_timeout(Car_t *car);
+
 void car_update_absolute_speed(Car_t *car);
 
 #endif // CAR_H

@@ -243,7 +243,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Timeout de reception : permet de verifier regulierement que l'antenne est toujours la
-    struct timeval tv = { .tv_sec = 5, .tv_usec = 0 };
+    struct timeval tv = { .tv_sec = 1, .tv_usec = 0 };
     setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
     debug_printf("En ecoute UDP sur le port %d...\n", port);
@@ -256,6 +256,12 @@ int main(int argc, char *argv[]) {
         ssize_t recus = recvfrom(sock, buffer, sizeof(buffer) - 1, 0,
             (struct sockaddr *)&expediteur, &len);
         if (recus < 0) {
+            // Si le timeout est atteint, on remet la vitesse relative à 0.0
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                car_timeout(&car);
+                continue;
+            }
+            // On vérifie si l'antenne est toujours débranchée, on redémarre si c'est le cas
             if (access(syspath, F_OK) != 0) {
                 fprintf(stderr, "Interface %s disparue (antenne debranchee ?) : redemarrage\n", iface);
                 return 1; // Docker relance le conteneur, qui re-attendra l'interface

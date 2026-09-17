@@ -39,6 +39,12 @@ void car_display_state(Car_t *car) {  // Affichage de l'état actuel de la voitu
     fflush(stdout);
 }
 
+void car_timeout(Car_t *car) {  // Si pas de paquet pendant 1s, on remet la vitesse relative à 0.0
+    car->relative_speed = 0.0;
+    car_update_absolute_speed(car);
+    car_display_state(car);
+}
+
 void car_reception(Car_t *car, const char *payload) {
     // Extraction des valeurs de la charge utile (payload)
     char *ptr;
@@ -83,6 +89,9 @@ void car_reception(Car_t *car, const char *payload) {
     } else if (car->relative_speed > 1.0) {
         car->relative_speed = 1.0;
     }
+
+    // Si pas de paquet pendant 1s, on remet la vitesse relative à 0.0
+    
 
     // Mise à jour de la direction du servo et de la vitesse absolue du moteur et affichage de l'état actuel de la voiture
     servo_control(car->direction);
