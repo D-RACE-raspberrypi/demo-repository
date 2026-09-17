@@ -264,22 +264,12 @@ int main(int argc, char *argv[]) {
             continue;
         }
         buffer[recus] = '\0';
-        buffer[strcspn(buffer, "\r\n")] = '\0'; // retire le retour a la ligne final
 
         char ip_expediteur[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &expediteur.sin_addr, ip_expediteur, sizeof(ip_expediteur));
 
-        // On separe "texte:nombre" (le nombre est un flottant, ex. "JGX:-0.53")
-        char *sep = strchr(buffer, ':');
-        if (sep != NULL) {
-            *sep = '\0';
-            float valeur = strtof(sep + 1, NULL);
-            debug_printf("%s -> %s = %.3f\n", ip_expediteur, buffer, valeur);
-            car_reception(&car, (const char *)buffer);
-        } else {
-            debug_printf("%s -> %s\n", ip_expediteur, buffer);
-            car_reception(&car, (const char *)buffer);
-        }
+        debug_printf("%s -> trame recue (%zd octets)\n%s\n", ip_expediteur, recus, buffer);
+        car_reception(&car, buffer);
     }
 
     close(sock);
