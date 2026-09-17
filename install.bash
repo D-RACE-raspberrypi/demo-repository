@@ -121,7 +121,7 @@ if [ -d "/boot/firmware" ]; then
 fi
 
 sed -i '/^dtoverlay=pwm2-chan/d' "$CONFIG_PATH"
-echo "dtoverlay=pwm2-chan" | tee -a "$CONFIG_PATH"
+echo "dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4" | tee -a "$CONFIG_PATH"
 echo -e "${GREEN}[SUCCESS] dtoverlay for PWM added in $CONFIG_PATH.${NC}"
 
 # 8. Attribution persistante des cartes Wi-Fi (udev)
@@ -164,6 +164,17 @@ tee /etc/NetworkManager/conf.d/99-ignore-wlan1.conf > /dev/null <<EOL
 unmanaged-devices=interface-name:wlan1
 EOL
 systemctl restart NetworkManager || true
+echo -e "${YELLOW}-> Waiting for network connectivity...${NC}"
+for i in {1..60}; do
+    if getent hosts docker.io >/dev/null 2>&1; then
+        echo -e "${GREEN}[SUCCESS] Network is back.${NC}"
+        break
+    fi
+    sleep 1
+done
+if ! getent hosts docker.io >/dev/null 2>&1; then
+    echo -e "${RED}[ERROR] Network connectivity could not be established.${NC}"
+fi
 echo -e "${GREEN}[SUCCESS] wlan1 successfully isolated.${NC}"
 
 # 11. Build de l'image et premier lancement des conteneurs
